@@ -16,6 +16,15 @@
   }
 }
 </script>
+<script>
+  function ValidateFormMemberForm() {
+  var x = document.forms["addItem"]["mem"].value;
+  if (x == "") {
+    alert("Work/Member field must be filled out");
+    return false;
+  }
+}
+</script>
 
 </head>
 <!--navigation bar start-->
@@ -23,42 +32,70 @@
   <a class="navbar-brand" href="/">BucketList</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
-  </button>
+  </button>&nbsp;&nbsp;
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
         <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+      </li>&nbsp;&nbsp;
+      <li class="nav-item">
+        <a class="nav-link" href="#">Calendar</a>
+      </li>&nbsp;&nbsp;
+      
+
+      {% if user.is_authenticated %}
+      <li class="nav-item">
+        <a class="nav-link" href="#memberForm">Add Team Members</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="#">Your Log</a>
+        <a class="nav-link disabled" href="{% url 'logout' %}">Logout</a>
+      </li>
+      {% else %}
+      <li class="nav-item">
+        <a class="nav-link disabled" href="{% url 'BucketList:user_login' %}">Login</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="#">Calendar</a>
+        <a class="nav-link disabled" href="{% url 'BucketList:register' %}">Register</a>
       </li>
+      {% endif %}
     </ul>
   </div>
 </nav>
 </section>
 <!--NAVIGATION BAR ENDS-->
 
-<br>
-<br>
 
 <body style="background-color:grey ">
 	<div style="margin: 100px">
-
+{% if user.is_authenticated %}
 <!--sort dropdown-->
-<div class="dropdown">
+<div class="dropdown" style="float: left">
   <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     SORT BY
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
     <a class="dropdown-item" href="{% url 'sortbymem' %}">Team Members</a>
     <a class="dropdown-item" href="{% url 'sortbydead' %}">Deadline</a>
+    <div class="dropdown-divider"></div>
     <a class="dropdown-item" href="{% url 'unsort' %}">Remove Sort</a>
   </div>
 </div>
 <!--sort dropdown ends-->
+&nbsp;&nbsp;&nbsp;
+<!--members dropdown-->
+<div class="dropdown" style="float: left" >
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    MEMBERS
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    {% for member in all_members %}
+    <a class="dropdown-item" href="#" >{{ member.mem }}</a>
+    {% endfor %}
+    
+  </div>
+</div>
+<!--members dropdown ends-->
+
 
 <br>
 <br>
@@ -82,17 +119,26 @@
 <br>
 <br>
 
-<form name="addItem" action="/add/" onsubmit="return ValidateForm()" method="post">{% csrf_token %}
-	WORK: <input  type="text" name="content" ><br><br>
-  DEADLINE:  <input type="date" name="deadline" ><br><br>
-  MEMBER: <input type="text" name="member" ><br><br>
-	<input class="btn btn-primary" type="submit" value="ADD">
+<div class="card" style="width: 25rem;" style="float: left">
+  <div class="card-body">
+    <h5 class="card-title">Add Work</h5>
+        <p class="card-text">Add work to your project, assign it to a member!</p>
+        <form name="addItem" action="/add/" onsubmit="return ValidateFormAddItem()" method="post">{% csrf_token %}
+          <h6>WORK TO BE DONE:</h6> <input  type="text" name="content" ><br><br>
+          <h6>DEADLINE:</h6>  <input type="date" name="deadline" ><br><br>
+          <h6>MEMBER:</h6> <input type="text" name="member" ><br><br>
+          <input class="btn btn-primary" type="submit" value="ADD">
+        </form> 
+  </div>
+</div>
+<br><br><br>
+<div style="float: left">
+<form id="memberForm" name="mem" action="/addMember/" onsubmit="return ValidateFormMemberForm()" method="post">{% csrf_token %}
+  MEMBER NAME:<input type="text" name="memname"><br>
+  <input class="btn btn-primary" type="submit" value="ADD MEMBER">
 </form>
-
-
-
-
-
+</div>
+{% endif %}
 </div>
 </body>
 </html>
