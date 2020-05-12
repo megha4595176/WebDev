@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from BucketList.views import add,delete,sortbydead,sortbymem,unsort
-
+from BucketList.views import add,delete,sortbydead,sortbymem,unsort,addnotif
+ 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +26,7 @@ urlpatterns = [
     #path('/<int:item_id>/',changeForm,name="change"),
     path('/sort1/',sortbydead,name="sortbydead"),
     path('/sort2/',sortbymem,name="sortbymem"),
-    path('/unsort',unsort,name="unsort")
+    path('/unsort',unsort,name="unsort"),
+    path('addnotif/', addnotif),
    
 ]

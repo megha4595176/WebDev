@@ -30,5 +30,10 @@ def unsort(request):
 	all_items=ListItem.objects.all()
 	return render(request,'BucketList/home.html',{'all':all_items})
 
+def addnotif(request):
+	new_item= ListNotif(task=request.POST['task'],member2=request.POST['member2'],status=request.POST['status'])
+	new_item.save()
+	return HttpResponseRedirect('/')
 
+     
 
