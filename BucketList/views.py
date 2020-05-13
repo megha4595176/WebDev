@@ -1,30 +1,59 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import ListItem,Profile
+from .models import ListItem,Profile,Leader
 from .forms import Userform
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 import operator
+from django.contrib import messages
+
 
 # Create your views here.
-def home(request):
+def home(request, leadsignedin={}):
+	context={
+	'leadsignedin':False
+	}
 	if request.user.is_authenticated:
 		all_member= Profile.objects.filter(memberid__id=request.user.id)
 		all_items = ListItem.objects.filter(team__id=request.user.id)
-		return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member})
+		TeamLeader= Leader.objects.filter(leaderid__id=request.user.id)
+		context.update(leadsignedin)
+		return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member,'teamleader':TeamLeader,'leadsignedin':leadsignedin})
 	else:
 		return render(request,'BucketList/home.html',{})
 
 def add(request):
 	new_item= ListItem(content=request.POST['content'],member=request.POST['member'],deadline=request.POST['deadline'],team=request.user)
-	new_item.save()
-	return HttpResponseRedirect('/')
+	all_member= Profile.objects.filter(memberid__id=request.user.id)
+	flag=0;
+	for member in all_member:
+		if(new_item.member == member.mem):
+			new_item.save()
+			return HttpResponseRedirect('/')
+			flag=1;
+	if(flag==0):
+		messages.info(request,"Work could not be added as it was assigned to a non-existent member")
+		return HttpResponseRedirect('/')
 
 def addMember(request):
 	new_mem= Profile(mem=request.POST['memname'],memberid=request.user)
 	new_mem.save()
 	return HttpResponseRedirect('/')
+
+def addLeader(request):
+	leader=Leader(Group_leader=request.POST['Leader'],leaderid=request.user,leader_pin="abcd")
+	all_member= Profile.objects.filter(memberid__id=request.user.id)
+	flag=0;
+	for member in all_member:
+		if(leader.Group_leader == member.mem):
+			leader.save()
+			messages.info(request,"Your pin is abcd.")
+			return HttpResponseRedirect('/')
+			flag=1;
+	if(flag==0):
+		messages.info(request,"Leader could not be added as it was assigned to a non-existent member")
+		return HttpResponseRedirect('/')
 
 def delete(request,item_id):
 	item_d= ListItem.objects.get(id=item_id)
@@ -32,15 +61,17 @@ def delete(request,item_id):
 	return HttpResponseRedirect('/')
 
 def sortbydead(request):
-	all_items = ListItem.objects.order_by('deadline')
+	stuff = ListItem.objects.filter(team__id=request.user.id) 
+	all_items = stuff.order_by('deadline')
 	return render(request,'BucketList/home.html',{'all':all_items})
 
 def sortbymem(request):
-	all_items = ListItem.objects.order_by('member')
+	stuff = ListItem.objects.filter(team__id=request.user.id)
+	all_items = stuff.order_by('member')
 	return render(request,'BucketList/home.html',{'all':all_items})
 
 def unsort(request):
-	all_items=ListItem.objects.all()
+	all_items=ListItem.objects.filter(team__id=request.user.id)
 	return render(request,'BucketList/home.html',{'all':all_items})
 
 @login_required
@@ -56,19 +87,15 @@ def register(request):
 	registered = False
 	if request.method == 'POST':
 		user_form = Userform(data=request.POST)
-		#profile_form = Userform(data=request.POST)
-		if user_form.is_valid(): #and profile_form.is_valid():
+		if user_form.is_valid():
 			user = user_form.save()
 			user.set_password(user.password)
 			user.save()
-			#profile=profile_form.save(commit=False)
-			#profile.save()
 			registered=True
 		else:
 			print(user_form.errors)
 	else:
 		user_form = Userform()
-		#profile_form = ProfileForm()
 	return render(request,'BucketList/registrations.html',{'user_form':user_form,'registered':registered})
 
 def user_login(request):
@@ -84,3 +111,15 @@ def user_login(request):
 	else:
 		return render(request,'BucketList/login.html', {})
 
+def signasleader(request):
+	leadersignin=False
+	leaderpin=request.POST.get('leaderpin')
+	leader= Leader.objects.get(leaderid__id=request.user.id)
+	if(leaderpin == leader.leader_pin):
+		leadersignin=True
+		context={'leadsignedin':leadersignin}
+		response=home(request, context)
+		return response
+	else:
+		messages.info(request,"Wrong pin!")
+		return HttpResponseRedirect('/')

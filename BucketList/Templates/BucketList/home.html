@@ -6,26 +6,46 @@
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    {% if message.tags %}<script>alert("{{ message }}")</script>{% endif %}
+    {% endfor %}
+</ul>
+{% endif %}
+
   <script>
   function ValidateForm() {
   var x = document.forms["addItem"]["content"].value;
   var z = document.forms["addItem"]["member"].value;
-  if (x == "") {
-    alert("Work/Member field must be filled out");
+  if (x == "" ) {
+    alert("Work field must be filled out");
+    return false;
+  }
+  if (z == "" ) {
+    alert("Member field must be filled out");
     return false;
   }
 }
 </script>
 <script>
   function ValidateFormMemberForm() {
-  var x = document.forms["addItem"]["mem"].value;
+  var x = document.forms["mem"]["memname"].value;
   if (x == "") {
-    alert("Work/Member field must be filled out");
+    alert("Member field must be filled out");
     return false;
   }
 }
 </script>
-
+<script>
+  function ValidateFormLeaderForm() {
+  var x = document.forms["addLeader"]["Leader"].value;
+  if (x == "") {
+    alert("Member field must be filled out");
+    return false;
+  }
+}
+</script>
 </head>
 <!--navigation bar start-->
 	<section><nav class="navbar navbar-expand-lg navbar-light bg-light navbar navbar-dark bg-dark">
@@ -46,10 +66,13 @@
       {% if user.is_authenticated %}
       <li class="nav-item">
         <a class="nav-link" href="#memberForm">Add Team Members</a>
-      </li>
+      </li>&nbsp;&nbsp;
       <li class="nav-item">
         <a class="nav-link disabled" href="{% url 'logout' %}">Logout</a>
-      </li>
+      </li>&nbsp;&nbsp;{% if not leadsignedin %}
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#signasleader">Sign in as Leader</a>
+      </li>{% endif %}
       {% else %}
       <li class="nav-item">
         <a class="nav-link disabled" href="{% url 'BucketList:user_login' %}">Login</a>
@@ -66,9 +89,11 @@
 
 
 <body style="background-color:grey ">
-	<div style="margin: 100px">
+<div style="margin: 100px">
 {% if user.is_authenticated %}
+
 <!--sort dropdown-->
+{% if not leadsignedin %}
 <div class="dropdown" style="float: left">
   <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     SORT BY
@@ -80,8 +105,13 @@
     <a class="dropdown-item" href="{% url 'unsort' %}">Remove Sort</a>
   </div>
 </div>
+
 <!--sort dropdown ends-->
-&nbsp;&nbsp;&nbsp;
+
+<div style="float: left">
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</div>{% endif %}
+
 <!--members dropdown-->
 <div class="dropdown" style="float: left" >
   <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -99,17 +129,21 @@
 
 <br>
 <br>
+<br>
 
 <!--LISTING STARTS-->
 	<ul class="list-group">
-		{% for item in all %}
-		<li class="list-group-item list-group-item-action list-group-item-secondary" >{{ item.content }} <br><br>  To Be Done by:   {{ item.member }}
-      &nbsp &nbsp
-    <a href="" class="btn btn-secondary btn-sm">CHANGE</a>
-       DEADLINE: {{ item.deadline }}  <form action="/delete/{{ item.id }}/" method="post" style="display:inline">
-			{% csrf_token %}
-			&nbsp &nbsp
-		<input class="btn btn-secondary btn-sm" type="submit" value="DELETE">
+	{% for item in all %}
+	<li class="list-group-item list-group-item-action list-group-item-secondary" >
+  <h5 class="card-title">Task:</h5>
+  <h6 class="card-text">{{ item.content }}</h6>
+  <br>
+  <div style="float: left"><h5>Assigned to:</h5>{{ item.member }}&nbsp;&nbsp;
+  <!--{% if leadsignedin %}<a href="{% url 'change' %}" class="btn btn-secondary btn-sm">CHANGE</a>{% endif %}--></div>
+  <div style="float: left;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+  <div style="float: left"><h5>Deadline:</h5> {{ item.deadline }} <form action="/delete/{{ item.id }}/" method="post" style="display:inline">
+			{% csrf_token %} &nbsp;&nbsp;
+		<input class="btn btn-secondary btn-sm" type="submit" value="DELETE"></div>
 		</form>
 		</li><br>
 		{% endfor %}
@@ -124,20 +158,57 @@
     <h5 class="card-title">Add Work</h5>
         <p class="card-text">Add work to your project, assign it to a member!</p>
         <form name="addItem" action="/add/" onsubmit="return ValidateFormAddItem()" method="post">{% csrf_token %}
-          <h6>WORK TO BE DONE:</h6> <input  type="text" name="content" ><br><br>
+          <h6>TASK TO BE ADDED:</h6> <input  type="text" name="content" ><br><br>
           <h6>DEADLINE:</h6>  <input type="date" name="deadline" ><br><br>
-          <h6>MEMBER:</h6> <input type="text" name="member" ><br><br>
+          {% if leadsignedin %}<h6>MEMBER:</h6> <input type="text" name="member" >{% endif %}<br><br>
           <input class="btn btn-primary" type="submit" value="ADD">
         </form> 
   </div>
 </div>
 <br><br><br>
-<div style="float: left">
-<form id="memberForm" name="mem" action="/addMember/" onsubmit="return ValidateFormMemberForm()" method="post">{% csrf_token %}
-  MEMBER NAME:<input type="text" name="memname"><br>
-  <input class="btn btn-primary" type="submit" value="ADD MEMBER">
-</form>
+<div style="float: left margin-bottom: 50px" >
+  <div class="card" style="width: 25rem;" style="float: left">
+    <div class="card-body">
+      <h5 class="card-title">Add Member</h5>
+        <p class="card-text">Add more members to your team!</p>
+        <form id="memberForm" name="mem" action="/addMember/" onsubmit="return ValidateFormMemberForm()" method="post">{% csrf_token %}
+        <h6>MEMBER NAME:</h6><input type="text" name="memname"><br><br>
+        <input class="btn btn-primary" type="submit" value="ADD MEMBER" >
+        </form>
+    </div>
+  </div>
 </div>
+
+<br><br>
+{% if not leadsignedin and not teamleader %}
+<div style="float: left margin-bottom: 50px" >
+  <div class="card" style="width: 25rem;" style="float: left">
+    <div class="card-body">
+      <h5 class="card-title">Add Team Leader</h5>
+        <p class="card-text">Note that team leader cannot be changed in the future.</p>
+        <form id="leaderForm" name="addLeader" action="/addLeader/" onsubmit="return ValidateFormLeaderForm()" method="post">{% csrf_token %}
+        <h6>MEMBER NAME:</h6><input type="text" name="Leader"><br><br>
+        <input class="btn btn-primary" type="submit" value="ADD LEADER" >
+        </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+<br>
+<br>
+{% if not leadsignedin %}
+<div style="float: left margin-bottom: 50px" >
+  <div class="card" style="width: 25rem;" style="float: left">
+    <div class="card-body">
+      <h5 class="card-title">Sign in as Leader!</h5>
+        <form id="signasleader" name="signleader" action="/signasleader/" onsubmit="return ValidateSignIn()" method="post">{% csrf_token %}
+        <h6>LEADER PIN:</h6><input type="text" name="leaderpin"><br><br>
+        <input class="btn btn-primary" type="submit" value="SIGN IN" >
+        </form>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% endif %}
 </div>
 </body>

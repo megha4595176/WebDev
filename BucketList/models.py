@@ -12,10 +12,7 @@ class Profile(models.Model):
     memberid=models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
     mem = models.TextField(max_length=30, blank=True, null=True)
     
-
-
-
-
-
-
-
+class Leader(models.Model):
+	leaderid=models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
+	Group_leader=models.TextField(max_length=30, blank=True, null=True)
+	leader_pin=models.TextField(max_length=4,blank=True, null=True)

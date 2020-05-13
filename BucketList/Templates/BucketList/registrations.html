@@ -11,15 +11,16 @@
     <div class="jumbotron">
       {% if registered %}
         <h1>Thank you for registering!</h1>
+        <br>
+        <h4>Go to <a href="{% url 'BucketList:user_login' %}" class="btn btn-secondary btn-sm">LOGIN</a> page</h4>
       {% else %}
         <h1>Register Here</h1>
         <h3>Just fill out the form.</h3>
-<form enctype="multipart/form-data" method="POST">
+          <form enctype="multipart/form-data" method="POST">
           {% csrf_token %}
           {{ user_form.as_p }}
           <input type="submit" name="" value="Register">
         </form>
-        
       {% endif %}
     </div>
   </div>

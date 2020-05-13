@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from BucketList.views import add,delete,sortbydead,sortbymem,unsort,addMember
+from BucketList.views import add,delete,sortbydead,sortbymem,unsort,addMember,addLeader,signasleader
 from BucketList import views
 from django.conf.urls import url,include
 
@@ -26,16 +26,16 @@ urlpatterns = [
     path('',include('BucketList.urls')),
     path('add/', add),
     path('addMember/',addMember),
+    path('addLeader/',addLeader),
     path('delete/<int:item_id>/',delete),
     #path('/<int:item_id>/',changeForm,name="change"),
-    path('/sort1/',sortbydead,name="sortbydead"),
-    path('/sort2/',sortbymem,name="sortbymem"),
-    path('/unsort',unsort,name="unsort"),
+    path('sort1/',sortbydead,name="sortbydead"),
+    path('sort2/',sortbymem,name="sortbymem"),
+    path('unsort/',unsort,name="unsort"),
     url(r'^$',views.home,name='home'),
     url(r'^special/',views.special,name='special'),
     url(r'^BucketList/',include('BucketList.urls')),
     url(r'^logout/$', views.user_logout, name='logout'),
+    url(r'^signasleader/$', views.signasleader, name='signasleader'),
 
-    
-   
 ]
