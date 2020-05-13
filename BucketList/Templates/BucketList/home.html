@@ -22,10 +22,6 @@
     alert("Work field must be filled out");
     return false;
   }
-  if (z == "" ) {
-    alert("Member field must be filled out");
-    return false;
-  }
 }
 </script>
 <script>
@@ -68,27 +64,72 @@
         <a class="nav-link" href="#memberForm">Add Team Members</a>
       </li>&nbsp;&nbsp;
       <li class="nav-item">
-        <a class="nav-link disabled" href="{% url 'logout' %}">Logout</a>
+        <a class="nav-link " href="{% url 'logout' %}">Logout</a>
       </li>&nbsp;&nbsp;{% if not leadsignedin %}
       <li class="nav-item">
-        <a class="nav-link disabled" href="#signasleader">Sign in as Leader</a>
+        <a class="nav-link" href="#signasleader">Sign in as Leader</a>
       </li>{% endif %}
       {% else %}
       <li class="nav-item">
-        <a class="nav-link disabled" href="{% url 'BucketList:user_login' %}">Login</a>
+        <a class="nav-link" href="{% url 'BucketList:user_login' %}">Login</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link disabled" href="{% url 'BucketList:register' %}">Register</a>
+        <a class="nav-link" href="{% url 'BucketList:register' %}">Register</a>
       </li>
       {% endif %}
+{% if user.is_authenticated %}
+  <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Notifications
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <ul class="list-group">
+            {% for item in notifs %}
+            <li class="dropdown-item"> <b>Task</b>:  {{ item.content }} <br>  <b>Member</b>:   {{ item.member }}
+              &nbsp; &nbsp;
+               <b>Status</b>: {{ item.status }} 
+              &nbsp; &nbsp;
+            </li><br><div class="dropdown-divider"></div>
+            {% endfor %}
+            <!--<form name="addItem" action="addnotif/" onsubmit="return ValidateForm()" method="post">{% csrf_token %}
+              TASK: <input  type="text" name="task" ><br><br>
+              MEMBER:  <input type="text" name="member2" ><br><br>
+              STATUS: <input type="text" name="status" ><br><br>
+              <input class="btn btn-primary" type="submit" value="ADDNOTIF">
+            </form>-->
+          </ul>
+        </div>
+      </li>
+
+{% endif %}
     </ul>
   </div>
 </nav>
 </section>
 <!--NAVIGATION BAR ENDS-->
+{% if not user.is_authenticated %}
+<div class="container">
+<div style="float: left">
+<p class="display-4" style="margin-top: 140px; color: DimGrey;font-weight: 500">&nbsp;&nbsp;&nbsp;&nbsp;BUILD WITH </p><p class="display-1" style="font-family: Inter,-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+    font-weight: 500;color: white;"><b>BucketList</b></p></div>
+    <div style="float: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+  <div style="float: left;margin-top: 75px"><div class="card" style="width: 30rem;">
+  <!--<img src="..." class="card-img-top" alt="...">-->
+  <div class="card-body">
+    <p>
+    <p class="card-text" style="font-weight: 500; font-size: 30;color: Teal;text-align: center">Want to build together? You have come to right place!</p><br>
+    <p style="font-weight: 500;color:black;font-size: 20;text-align: justify">Plan your work, assign it to team members, be upto date with deadlines, and personalise your work space with your team. Sign up to get started!<br><br><p style="text-align: center;color: Teal;font-weight: 500"><a style="color: Teal" href="{% url 'BucketList:user_login' %}">
+    Already a member? Login!</a></p>
+    </p>
+  </div>
+</div>
+  </div>
+<br>
+<br><br><br>
+</div>
+{% endif %}
 
-
-<body style="background-color:grey ">
+<body style="background:black ">
 <div style="margin: 100px">
 {% if user.is_authenticated %}
 
@@ -138,15 +179,26 @@
   <h5 class="card-title">Task:</h5>
   <h6 class="card-text">{{ item.content }}</h6>
   <br>
-  <div style="float: left"><h5>Assigned to:</h5>{{ item.member }}&nbsp;&nbsp;
-  <!--{% if leadsignedin %}<a href="{% url 'change' %}" class="btn btn-secondary btn-sm">CHANGE</a>{% endif %}--></div>
+  <div style="float: left"><h5>Assigned to:</h5>{{ item.member }}&nbsp;&nbsp;</div>
   <div style="float: left;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
   <div style="float: left"><h5>Deadline:</h5> {{ item.deadline }} <form action="/delete/{{ item.id }}/" method="post" style="display:inline">
 			{% csrf_token %} &nbsp;&nbsp;
-		<input class="btn btn-secondary btn-sm" type="submit" value="DELETE"></div>
-		</form>
-		</li><br>
-		{% endfor %}
+		<input class="btn btn-secondary btn-sm" type="submit" value="DELETE">
+		</form></div><br>
+    {% if not leadsignedin %}
+    <div style="float: left;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+    <div style="float: left"><form action="/complete/{{ item.id }}/" method="post" style="display:inline">{% csrf_token %}<input class="btn btn-success btn-secondary btn-sm" type="submit" value="COMPLETED TASK">
+  </form></div>{% endif %}
+
+  {% if leadsignedin %}
+  <br><br><br>
+  <div style="float: left"><form  action="/change/{{ item.id }}/" method="post">{% csrf_token %}<input type="submit" class="btn btn-secondary btn-sm" value="CHANGE"><input type="text" name="memchange"></form></div>
+  <div style="float: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+  <div style="float: left"><form action="/complete/{{ item.id }}/" method="post">{% csrf_token %}<input class="btn btn-success btn-secondary btn-sm" type="submit" value="COMPLETED TASK">
+  </form></div>{% endif %}
+  </li><br>
+	{% endfor %}
+
 	</ul>
   <!--LISTING ENDS--> 
 
@@ -160,7 +212,7 @@
         <form name="addItem" action="/add/" onsubmit="return ValidateFormAddItem()" method="post">{% csrf_token %}
           <h6>TASK TO BE ADDED:</h6> <input  type="text" name="content" ><br><br>
           <h6>DEADLINE:</h6>  <input type="date" name="deadline" ><br><br>
-          {% if leadsignedin %}<h6>MEMBER:</h6> <input type="text" name="member" >{% endif %}<br><br>
+          <h6>MEMBER:</h6> <input type="text" name="member" ><br><br>
           <input class="btn btn-primary" type="submit" value="ADD">
         </form> 
   </div>

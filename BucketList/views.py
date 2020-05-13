@@ -17,9 +17,10 @@ def home(request, leadsignedin={}):
 	if request.user.is_authenticated:
 		all_member= Profile.objects.filter(memberid__id=request.user.id)
 		all_items = ListItem.objects.filter(team__id=request.user.id)
+		allitems = all_items.filter(status="Incomplete")
 		TeamLeader= Leader.objects.filter(leaderid__id=request.user.id)
 		context.update(leadsignedin)
-		return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member,'teamleader':TeamLeader,'leadsignedin':leadsignedin})
+		return render(request,'BucketList/home.html',{'all':allitems,'all_members':all_member,'teamleader':TeamLeader,'leadsignedin':leadsignedin,'notifs':all_items})
 	else:
 		return render(request,'BucketList/home.html',{})
 
@@ -60,19 +61,32 @@ def delete(request,item_id):
 	item_d.delete()
 	return HttpResponseRedirect('/')
 
+def complete(request,item_id):
+	item_d= ListItem.objects.get(id=item_id)
+	item_d.status="Completed :)"
+	item_d.save()
+	return HttpResponseRedirect('/')
+
+def change(request,item_id):
+	item_d= ListItem.objects.filter(id=item_id).update(member=request.POST['memchange'])
+	return HttpResponseRedirect('/')
+
 def sortbydead(request):
+	all_member= Profile.objects.filter(memberid__id=request.user.id)
 	stuff = ListItem.objects.filter(team__id=request.user.id) 
 	all_items = stuff.order_by('deadline')
-	return render(request,'BucketList/home.html',{'all':all_items})
+	return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member})
 
 def sortbymem(request):
+	all_member= Profile.objects.filter(memberid__id=request.user.id)
 	stuff = ListItem.objects.filter(team__id=request.user.id)
 	all_items = stuff.order_by('member')
-	return render(request,'BucketList/home.html',{'all':all_items})
+	return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member})
 
 def unsort(request):
+	all_member= Profile.objects.filter(memberid__id=request.user.id)
 	all_items=ListItem.objects.filter(team__id=request.user.id)
-	return render(request,'BucketList/home.html',{'all':all_items})
+	return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member})
 
 @login_required
 def special(request):
@@ -107,7 +121,8 @@ def user_login(request):
 			login(request,user)
 			return HttpResponseRedirect(reverse('home'))
 		else:
-			return HttpResponse("invalid login details")
+			messages.info(request,"Wrong username/password!")
+			return render(request,'BucketList/login.html', {})
 	else:
 		return render(request,'BucketList/login.html', {})
 
