@@ -8,6 +8,33 @@ from django.contrib.auth.decorators import login_required
 import operator
 from django.contrib import messages
 
+'''from datetime import timedelta
+import datetime
+import pytz
+
+import httplib2
+from googleapiclient.discovery import build
+from oauth2client.service_account import ServiceAccountCredentials
+
+service_account_email = 'bucketlistadmin@bucketlist-2001.iam.gserviceaccount.com'
+
+CLIENT_SECRET_FILE = 'bucketlist-2001-58a3dfd48f62.json'
+
+SCOPES = 'https://www.googleapis.com/auth/calendar'
+scopes = [SCOPES]
+
+def build_service():
+	credentials = ServiceAccountCredentials.from_json_keyfile_name(filename='bucketlist-2001-58a3dfd48f62.json',scopes=SCOPES)
+	http = credentials.authorize(httplib2.Http())
+	service = build('calendar', 'v3', http=http)
+	return service'''
+
+'''def create_event():
+   service = build_service()
+    start_datetime = datetime.datetime.now(tz=pytz.utc)
+	event = service.events().insert(calendarId='shreyayadav987@gmail.com', body={'summary': 'Foo','description': 'Bar','start': {'dateTime': start_datetime.isoformat()},'end': {'dateTime': (start_datetime + timedelta(minutes=15)).isoformat()} ,}).execute()
+	print(event)'''
+
 
 # Create your views here.
 def home(request, leadsignedin={}):
@@ -68,25 +95,39 @@ def complete(request,item_id):
 	return HttpResponseRedirect('/')
 
 def change(request,item_id):
-	item_d= ListItem.objects.filter(id=item_id).update(member=request.POST['memchange'])
+	flag=0;
+	members=Profile.objects.filter(memberid__id=request.user.id)
+	new_mem=request.POST['memchange']
+	for member in members:
+		if(new_mem == member.mem):
+			item_d= ListItem.objects.filter(id=item_id).update(member=request.POST['memchange'])
+			flag=1;
+	if(flag==0):
+		messages.info(request,"Member is not a part of the team!")
 	return HttpResponseRedirect('/')
 
 def sortbydead(request):
 	all_member= Profile.objects.filter(memberid__id=request.user.id)
+	TeamLeader= Leader.objects.filter(leaderid__id=request.user.id)
 	stuff = ListItem.objects.filter(team__id=request.user.id) 
-	all_items = stuff.order_by('deadline')
-	return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member})
+	allitems = stuff.filter(status="Incomplete")
+	all_items = allitems.order_by('deadline')
+	return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member,'notifs':stuff,'teamleader':TeamLeader})
 
 def sortbymem(request):
 	all_member= Profile.objects.filter(memberid__id=request.user.id)
+	TeamLeader= Leader.objects.filter(leaderid__id=request.user.id)
 	stuff = ListItem.objects.filter(team__id=request.user.id)
-	all_items = stuff.order_by('member')
-	return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member})
+	allitems = stuff.filter(status="Incomplete")
+	all_items = allitems.order_by('member')
+	return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member,'notifs':stuff,'teamleader':TeamLeader})
 
 def unsort(request):
 	all_member= Profile.objects.filter(memberid__id=request.user.id)
+	TeamLeader= Leader.objects.filter(leaderid__id=request.user.id)
 	all_items=ListItem.objects.filter(team__id=request.user.id)
-	return render(request,'BucketList/home.html',{'all':all_items,'all_members':all_member})
+	allitems = all_items.filter(status="Incomplete")
+	return render(request,'BucketList/home.html',{'all':allitems,'all_members':all_member,'notifs':all_items,'teamleader':TeamLeader})
 
 @login_required
 def special(request):

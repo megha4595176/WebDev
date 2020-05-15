@@ -1,10 +1,11 @@
 <DOCTYPE! html>
 <html>
 <head>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  
 
 {% if messages %}
 <ul class="messages">
@@ -16,10 +17,18 @@
 
   <script>
   function ValidateForm() {
+  var date=document.forms["addItem"]["deadline"].value;
+  var deadline=new Date(date);
+  var today=new Date();
+  today.setHours(0,0,0,0);
   var x = document.forms["addItem"]["content"].value;
   var z = document.forms["addItem"]["member"].value;
   if (x == "" ) {
     alert("Work field must be filled out");
+    return false;
+  }
+  if(today >= deadline){
+    alert("Deadline should be set to a date greater than today!");
     return false;
   }
 }
@@ -44,7 +53,7 @@
 </script>
 </head>
 <!--navigation bar start-->
-	<section><nav class="navbar navbar-expand-lg navbar-light bg-light navbar navbar-dark bg-dark">
+<section><nav class="navbar navbar-expand-lg navbar-light bg-light navbar navbar-dark bg-dark">
   <a class="navbar-brand" href="/">BucketList</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -61,8 +70,30 @@
 
       {% if user.is_authenticated %}
       <li class="nav-item">
-        <a class="nav-link" href="#memberForm">Add Team Members</a>
-      </li>&nbsp;&nbsp;
+        <button type="button" class="nav-link bg-dark" style="padding: none;border: none" onclick="document.getElementById('ADDMEM')" data-toggle="modal" data-target="#examplemodal">
+  Add Members
+</button></li>
+<div class="modal fade" id="examplemodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" >
+  <div class="modal-dialog modal-dialog-centered" role="document" >
+    <div class="modal-content">
+      <div class="modal-header">
+        </center><h5 class="modal-title" id="exampleModalLabel">ADD MEMBER</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <center><form name="mem" action="/addMember/" onsubmit="return ValidateFormMemberForm()" method="post">{% csrf_token %}
+        <h6 style="font-size: 30px">MEMBER NAME:</h6><br><input type="text" name="memname"><br><br>
+        </div>
+      <div class="modal-footer">
+        <input class="btn btn-primary" type="submit" value="ADD MEMBER" >
+        </form></center>
+        </div>
+    </div>
+  </div>
+</div>&nbsp;&nbsp;
+
       <li class="nav-item">
         <a class="nav-link " href="{% url 'logout' %}">Logout</a>
       </li>&nbsp;&nbsp;{% if not leadsignedin %}
@@ -79,24 +110,18 @@
       {% endif %}
 {% if user.is_authenticated %}
   <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class="nav-link dropdown-toggle " href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         Notifications
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <ul class="list-group">
             {% for item in notifs %}
             <li class="dropdown-item"> <b>Task</b>:  {{ item.content }} <br>  <b>Member</b>:   {{ item.member }}
-              &nbsp; &nbsp;
-               <b>Status</b>: {{ item.status }} 
+              &nbsp;&nbsp;
+                {% if item.status == "Completed :)" %}<span class="badge badge-success" style="text-align: left">Completed</span>{% else %}<span class="badge badge-danger" style="text-align: left">Incomplete</span>{% endif %}
               &nbsp; &nbsp;
             </li><br><div class="dropdown-divider"></div>
             {% endfor %}
-            <!--<form name="addItem" action="addnotif/" onsubmit="return ValidateForm()" method="post">{% csrf_token %}
-              TASK: <input  type="text" name="task" ><br><br>
-              MEMBER:  <input type="text" name="member2" ><br><br>
-              STATUS: <input type="text" name="status" ><br><br>
-              <input class="btn btn-primary" type="submit" value="ADDNOTIF">
-            </form>-->
           </ul>
         </div>
       </li>
@@ -117,7 +142,7 @@
   <!--<img src="..." class="card-img-top" alt="...">-->
   <div class="card-body">
     <p>
-    <p class="card-text" style="font-weight: 500; font-size: 30;color: Teal;text-align: center">Want to build together? You have come to right place!</p><br>
+    <p class="card-text" style="font-weight: 700; font-size: 32;color: Teal;text-align: center">Want to build together? You have come to right place!</p><br>
     <p style="font-weight: 500;color:black;font-size: 20;text-align: justify">Plan your work, assign it to team members, be upto date with deadlines, and personalise your work space with your team. Sign up to get started!<br><br><p style="text-align: center;color: Teal;font-weight: 500"><a style="color: Teal" href="{% url 'BucketList:user_login' %}">
     Already a member? Login!</a></p>
     </p>
@@ -129,8 +154,8 @@
 </div>
 {% endif %}
 
-<body style="background:black ">
-<div style="margin: 100px">
+<body style=" background:black; box-sizing: border-box ;background-attachment: fixed; background-repeat: no-repeat; background-size: cover;" style="background-position: center;">
+<div style="margin-left: 10rem; margin-right: 10rem; margin-top: 7rem;">
 {% if user.is_authenticated %}
 
 <!--sort dropdown-->
@@ -159,32 +184,33 @@
     MEMBERS
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+    {% if all_members %}
     {% for member in all_members %}
     <a class="dropdown-item" href="#" >{{ member.mem }}</a>
     {% endfor %}
-    
+    {% else %}
+    <a class="dropdown-item" href="#">No members :(</a>
+    {% endif %}
   </div>
 </div>
 <!--members dropdown ends-->
-
-
 <br>
 <br>
 <br>
-
 <!--LISTING STARTS-->
-	<ul class="list-group">
-	{% for item in all %}
-	<li class="list-group-item list-group-item-action list-group-item-secondary" >
+  <ul class="list-group">
+  {% if all %}
+  {% for item in all %}
+  <li class="list-group-item list-group-item-action list-group-item-secondary" >
   <h5 class="card-title">Task:</h5>
   <h6 class="card-text">{{ item.content }}</h6>
   <br>
   <div style="float: left"><h5>Assigned to:</h5>{{ item.member }}&nbsp;&nbsp;</div>
   <div style="float: left;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
   <div style="float: left"><h5>Deadline:</h5> {{ item.deadline }} <form action="/delete/{{ item.id }}/" method="post" style="display:inline">
-			{% csrf_token %} &nbsp;&nbsp;
-		<input class="btn btn-secondary btn-sm" type="submit" value="DELETE">
-		</form></div><br>
+      {% csrf_token %} &nbsp;&nbsp;
+    <input class="btn btn-secondary btn-sm" type="submit" value="DELETE">
+    </form></div><br>
     {% if not leadsignedin %}
     <div style="float: left;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div style="float: left"><form action="/complete/{{ item.id }}/" method="post" style="display:inline">{% csrf_token %}<input class="btn btn-success btn-secondary btn-sm" type="submit" value="COMPLETED TASK">
@@ -197,27 +223,32 @@
   <div style="float: left"><form action="/complete/{{ item.id }}/" method="post">{% csrf_token %}<input class="btn btn-success btn-secondary btn-sm" type="submit" value="COMPLETED TASK">
   </form></div>{% endif %}
   </li><br>
-	{% endfor %}
-
-	</ul>
+  {% endfor %}
+  {% else %}
+  <p class="display-4" style="margin-top: 10px; color: DimGrey;font-weight: 500">No Task Pending! WOHOO!</p>
+  {% endif %}
+  </ul>
   <!--LISTING ENDS--> 
-
 <br>
 <br>
-
-<div class="card" style="width: 25rem;" style="float: left">
+{% if leadsignedin %}
+<div>
+    <div style="float: left; margin-bottom: 2rem;" >
+      <div class="card" style="width: 15rem; height: 28rem;" style="float: left">
   <div class="card-body">
     <h5 class="card-title">Add Work</h5>
         <p class="card-text">Add work to your project, assign it to a member!</p>
-        <form name="addItem" action="/add/" onsubmit="return ValidateFormAddItem()" method="post">{% csrf_token %}
+        <form name="addItem" action="/add/" onsubmit="return ValidateForm()" method="post">{% csrf_token %}
           <h6>TASK TO BE ADDED:</h6> <input  type="text" name="content" ><br><br>
-          <h6>DEADLINE:</h6>  <input type="date" name="deadline" ><br><br>
+          <h6>DEADLINE:</h6>  <input id= "deadline" type="date" name="deadline" ><br><br>
           <h6>MEMBER:</h6> <input type="text" name="member" ><br><br>
           <input class="btn btn-primary" type="submit" value="ADD">
         </form> 
   </div>
 </div>
-<br><br><br>
+</div>
+</div>
+<!--<br><br><br>
 <div style="float: left margin-bottom: 50px" >
   <div class="card" style="width: 25rem;" style="float: left">
     <div class="card-body">
@@ -229,39 +260,47 @@
         </form>
     </div>
   </div>
-</div>
-
+</div>-->
 <br><br>
+{% endif %}
 {% if not leadsignedin and not teamleader %}
-<div style="float: left margin-bottom: 50px" >
-  <div class="card" style="width: 25rem;" style="float: left">
+<div>
+    <div style="float: left; margin-bottom: 2rem; " >
+      <div class="card" style="width: 15rem; height: 28rem;" style="float: left">
     <div class="card-body">
       <h5 class="card-title">Add Team Leader</h5>
         <p class="card-text">Note that team leader cannot be changed in the future.</p>
         <form id="leaderForm" name="addLeader" action="/addLeader/" onsubmit="return ValidateFormLeaderForm()" method="post">{% csrf_token %}
         <h6>MEMBER NAME:</h6><input type="text" name="Leader"><br><br>
         <input class="btn btn-primary" type="submit" value="ADD LEADER" >
-        </form>
+        </form><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRCjnIY2kIxzR6jN1D0ZCO1rYkTxJ4lYP0CY3qsPDlIe_Nta9HI&usqp=CAU" class="card-img-top">
     </div>
   </div>
 </div>
+</div>
+<br>
+<br>
 {% endif %}
-<br>
-<br>
-{% if not leadsignedin %}
-<div style="float: left margin-bottom: 50px" >
-  <div class="card" style="width: 25rem;" style="float: left">
+{% if not leadsignedin and teamleader %}
+<div class="row">
+    <div style="float: left;margin-left: 1rem; margin-bottom: 2rem;">
+      <div class="card" style="width: 15rem; height: 28rem;" style="float: left">
+  <div class="card">
     <div class="card-body">
       <h5 class="card-title">Sign in as Leader!</h5>
         <form id="signasleader" name="signleader" action="/signasleader/" onsubmit="return ValidateSignIn()" method="post">{% csrf_token %}
         <h6>LEADER PIN:</h6><input type="text" name="leaderpin"><br><br>
         <input class="btn btn-primary" type="submit" value="SIGN IN" >
-        </form>
+        </form> <img src="data:image/png;base64,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" class="card-img-top" >
     </div>
   </div>
 </div>
+</div>
+</div>
+
 {% endif %}
-{% endif %}
+
+      {% endif %}
 </div>
 </body>
 </html>
