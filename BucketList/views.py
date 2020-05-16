@@ -129,6 +129,12 @@ def unsort(request):
 	allitems = all_items.filter(status="Incomplete")
 	return render(request,'BucketList/home.html',{'all':allitems,'all_members':all_member,'notifs':all_items,'teamleader':TeamLeader})
 
+def addnotif(request):
+	new_item= ListNotif(task=request.POST['task'],member2=request.POST['member2'],status=request.POST['status'])
+	new_item.save()
+	return HttpResponseRedirect('/')
+
+     
 @login_required
 def special(request):
     return HttpResponse("You are logged in !")
