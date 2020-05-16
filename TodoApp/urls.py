@@ -15,13 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-<<<<<<< HEAD
 from BucketList.views import change,complete,add,delete,sortbydead,sortbymem,unsort,addMember,addLeader,signasleader
-=======
-from BucketList.views import add,delete,sortbydead,sortbymem,unsort,addnotif
- 
-from BucketList.views import add,delete,sortbydead,sortbymem,unsort,addMember
->>>>>>> 3dd4eaafcb876da7d4785568496a3bd7d59bdfaa
 from BucketList import views
 from django.conf.urls import url,include
 
@@ -34,19 +28,11 @@ urlpatterns = [
     path('addMember/',addMember),
     path('addLeader/',addLeader),
     path('delete/<int:item_id>/',delete),
-<<<<<<< HEAD
     path('complete/<int:item_id>/',complete),
     path('change/<int:item_id>/',change),
     path('sort1/',sortbydead,name="sortbydead"),
     path('sort2/',sortbymem,name="sortbymem"),
     path('unsort/',unsort,name="unsort"),
-=======
-    #path('/<int:item_id>/',changeForm,name="change"),
-    path('/sort1/',sortbydead,name="sortbydead"),
-    path('/sort2/',sortbymem,name="sortbymem"),
-    path('/unsort',unsort,name="unsort"),
-    path('addnotif/', addnotif),
->>>>>>> 3dd4eaafcb876da7d4785568496a3bd7d59bdfaa
     url(r'^$',views.home,name='home'),
     url(r'^special/',views.special,name='special'),
     url(r'^BucketList/',include('BucketList.urls')),
