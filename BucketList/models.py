@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -19,3 +22,15 @@ class Leader(models.Model):
 	Group_leader=models.TextField(max_length=30, blank=True, null=True)
 	leader_pin=models.TextField(max_length=4,blank=True, null=True)
 
+class Event(models.Model):
+	day = models.DateField(u'Day of the event', help_text=u'Day of the event')
+	end_time = models.TimeField(u'deadline', help_text=u'deadline')
+	notes = models.TextField(u'Textual Notes', help_text=u'Textual Notes')
+
+	class Meta:
+		verbose_name = u'Scheduling'
+		verbose_name_plural = u'Scheduling'
+
+	def get_absolute_url(self):
+		url = reverse('admin:%s_%s_change' % (self._meta.app_label, self._meta.model_name), args=[self.id])
+		return u'<a href="%s">%s</a>' % (url, str(self.start_time))

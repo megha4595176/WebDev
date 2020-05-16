@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 import operator
 from django.contrib import messages
 
+
 '''from datetime import timedelta
 import datetime
 import pytz
@@ -33,10 +34,36 @@ def build_service():
    service = build_service()
     start_datetime = datetime.datetime.now(tz=pytz.utc)
 	event = service.events().insert(calendarId='shreyayadav987@gmail.com', body={'summary': 'Foo','description': 'Bar','start': {'dateTime': start_datetime.isoformat()},'end': {'dateTime': (start_datetime + timedelta(minutes=15)).isoformat()} ,}).execute()
-	print(event)'''
+	print(event)
+def save(self, force_insert=False, force_update=False):
+    new_task = False
+    if not self.id:
+        new_task = True
+    super(Task, self).save(force_insert, force_update)
+    end = self.startDateTime + timedelta(minutes=24*60)
+    title = "This is test Task"
+    if new_task:
+        event = Event(start=self.startDateTime, end=end,title=title,
+                  description=self.description)
+        event.save()
+        rel = EventRelation.objects.create_relation(event, self)
+        rel.save()
+        try:
+            cal = Calendar.objects.get(pk=1)
+        except Calendar.DoesNotExist:
+            cal = Calendar(name="Community Calendar")
+            cal.save()
+        cal.events.add(event)
+    else:
+        event = Event.objects.get_for_object(self)[0]
+        event.start = self.startDateTime
+        event.end = end
+        event.title = title
+        event.description = self.description
+        event.save()'''
+def Calendar(request):
+	return render(request,'BucketList/change_list.html',{})
 
-
-# Create your views here.
 def home(request, leadsignedin={}):
 	context={
 	'leadsignedin':False
