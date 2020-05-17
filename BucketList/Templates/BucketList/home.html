@@ -8,7 +8,8 @@
  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-  
+  <script src="form.js" type="text/javascript"></script>
+  <script src="timer.js" type="text/javascript"></script>
 
 {% if messages %}
 <ul class="messages">
@@ -18,24 +19,7 @@
 </ul>
 {% endif %}
 
-  <script>
-  function ValidateForm() {
-  var date=document.forms["addItem"]["deadline"].value;
-  var deadline=new Date(date);
-  var today=new Date();
-  today.setHours(0,0,0,0);
-  var x = document.forms["addItem"]["content"].value;
-  var z = document.forms["addItem"]["member"].value;
-  if (x == "" ) {
-    alert("Work field must be filled out");
-    return false;
-  }
-  if(today >= deadline){
-    alert("Deadline should be set to a date greater than today!");
-    return false;
-  }
-}
-</script>
+  
 <script>
   function ValidateFormMemberForm() {
   var x = document.forms["mem"]["memname"].value;
@@ -157,7 +141,7 @@
 </div>
 {% endif %}
 
-<body style=" background:black; box-sizing: border-box ;background-attachment: fixed; background-repeat: no-repeat; background-size: cover;" style="background-position: center;">
+<body style=" background:burlywood; box-sizing: border-box ;background-attachment: fixed; background-repeat: no-repeat; background-size: cover;" style="background-position: center;">
 <div style="margin-left: 10rem; margin-right: 10rem; margin-top: 7rem;">
 {% if user.is_authenticated %}
 
@@ -196,6 +180,7 @@
   </div>
 </div>
 <!--members dropdown ends-->
+
 <br>
 <br>
 <br>
@@ -213,23 +198,30 @@
       {% csrf_token %} &nbsp;&nbsp;
     <input class="btn btn-secondary btn-sm" type="submit" value="DELETE">
     </form></div><br>
+    
+ <div id="clock"></div>
     {% if not leadsignedin %}
     <div style="float: left;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
     <div style="float: left"><form action="/complete/{{ item.id }}/" method="post" style="display:inline">{% csrf_token %}<input class="btn btn-success btn-secondary btn-sm" type="submit" value="COMPLETED TASK">
-  </form></div>{% endif %}
+  </form></div>
+  {% endif %}
 
   {% if leadsignedin %}
   <br><br><br>
   <div style="float: left"><form  action="/change/{{ item.id }}/" method="post">{% csrf_token %}<input type="submit" class="btn btn-secondary btn-sm" value="CHANGE"><input type="text" name="memchange"></form></div>
   <div style="float: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
   <div style="float: left"><form action="/complete/{{ item.id }}/" method="post">{% csrf_token %}<input class="btn btn-success btn-secondary btn-sm" type="submit" value="COMPLETED TASK">
-  </form></div>{% endif %}
+  </form></div>
+  {% endif %}
   </li><br>
   {% endfor %}
   {% else %}
   <p class="display-4" style="margin-top: 10px; color: DimGrey;font-weight: 500">No Task Pending! WOHOO!</p>
   {% endif %}
+  <br>
+
   </ul>
+  
   <!--LISTING ENDS--> 
 <br>
 <br>
